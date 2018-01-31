@@ -554,12 +554,12 @@ public final class Long extends Number implements Comparable<Long> {
    * @return the {@code long} represented by the string argument in the specified radix.
    * @throws NumberFormatException if the string does not contain a parsable {@code long}.
    */
-  public static long parseLong(String s, int radix)
+  public static long parseLong(String s, int radix)//将radix进制的字符串转化成long类型
       throws NumberFormatException {
-    if (s == null) {
+    if (s == null) {//字符串为空，抛出异常
       throw new NumberFormatException("null");
     }
-
+    //进制数不在2-36范围内抛出异常
     if (radix < Character.MIN_RADIX) {
       throw new NumberFormatException("radix " + radix +
           " less than Character.MIN_RADIX");
@@ -577,9 +577,9 @@ public final class Long extends Number implements Comparable<Long> {
     int digit;
 
     if (len > 0) {
-      char firstChar = s.charAt(0);
+      char firstChar = s.charAt(0);//字符串的第一个字符
       if (firstChar < '0') { // Possible leading "+" or "-"
-        if (firstChar == '-') {
+        if (firstChar == '-') { //如果是负号
           negative = true;
           limit = Long.MIN_VALUE;
         } else if (firstChar != '+') {
@@ -607,7 +607,7 @@ public final class Long extends Number implements Comparable<Long> {
           throw NumberFormatException.forInputString(s);
         }
         result -= digit;
-      }
+      }//进制算法，如234 ，8进制就是（（2*8+3）*8+4），类似把2*8*8+3*8+4提取公约数
     } else {
       throw NumberFormatException.forInputString(s);
     }
