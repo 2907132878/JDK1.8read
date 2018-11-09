@@ -90,7 +90,7 @@ import java.util.function.UnaryOperator;
  * @param <E> the type of elements held in this collection
  * @author Doug Lea
  * @since 1.5
- * /// write时要不要加锁，为什么？
+ * /// write时要不要加锁，为什么？ 答：写的时候需要加锁，避免多个线程对数组进行复制
  * // addIfAbsent为什么要加锁前后各要判断一次？
  * // CopyOnWrite适用于什么场景?
  */

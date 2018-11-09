@@ -128,13 +128,13 @@ public class LinkedList<E>
    * Links e as first element.
    */
   private void linkFirst(E e) {
-    final Node<E> f = first;
-    final Node<E> newNode = new Node<>(null, e, f);
+    final Node<E> f = first;//获取到第一个元素
+    final Node<E> newNode = new Node<>(null, e, f);//把元素e加到f之前，e的next指向f
     first = newNode;
     if (f == null) {
       last = newNode;
     } else {
-      f.prev = newNode;
+      f.prev = newNode;//f的前一个指向newNode
     }
     size++;
     modCount++;
@@ -229,8 +229,8 @@ public class LinkedList<E>
       x.prev = null;
     }
 
-    if (next == null) {
-      last = prev;
+    if (next == null) {//如果当前元素的next为空，说明是最后一个，
+      last = prev;//解除当前之后，last会为前一个
     } else {
       next.prev = prev;
       x.next = null;
@@ -426,11 +426,11 @@ public class LinkedList<E>
     }
 
     Node<E> pred, succ;
-    if (index == size) {
+    if (index  == size) {//说明是加到最后
       succ = null;
       pred = last;
     } else {
-      succ = node(index);
+      succ = node(index);//找到index位置的Node
       pred = succ.prev;
     }
 
@@ -440,14 +440,14 @@ public class LinkedList<E>
       if (pred == null) {
         first = newNode;
       } else {
-        pred.next = newNode;
+        pred.next = newNode; //add的时候把前一个的下一个指向新加的，新加的赋给前一个，依次循环
       }
       pred = newNode;
     }
 
     if (succ == null) {
       last = pred;
-    } else {
+    } else {//把之前index的加到添加完的之后
       pred.next = succ;
       succ.prev = pred;
     }
@@ -474,6 +474,7 @@ public class LinkedList<E>
       x.prev = null;
       x = next;
     }
+
     first = last = null;
     size = 0;
     modCount++;
@@ -582,7 +583,7 @@ public class LinkedList<E>
   /**
    * Returns the (non-null) Node at the specified element index.
    */
-  Node<E> node(int index) {
+  Node<E> node(int index) {//查找某个位置的元素是要从第一个或者是最后一个元素开始依次往下一个或者上一个找
     // assert isElementIndex(index);
 
     if (index < (size >> 1)) {
@@ -685,6 +686,7 @@ public class LinkedList<E>
    * @throws NoSuchElementException if this list is empty
    * @since 1.5
    */
+  //peek() element()都是返回第一个值，null的时候peek()不会抛出异常，element（）会
   public E element() {
     return getFirst();
   }
@@ -695,6 +697,7 @@ public class LinkedList<E>
    * @return the head of this list, or {@code null} if this list is empty
    * @since 1.5
    */
+  //移除第一个
   public E poll() {
     final Node<E> f = first;
     return (f == null) ? null : unlinkFirst(f);
@@ -805,7 +808,7 @@ public class LinkedList<E>
    * @param e the element to push
    * @since 1.6
    */
-  public void push(E e) {
+  public void push(E e) {//列表最前面加入元素
     addFirst(e);
   }
 
@@ -1057,7 +1060,7 @@ public class LinkedList<E>
    *
    * @return a shallow copy of this {@code LinkedList} instance
    */
-  public Object clone() {
+  public Object clone() {//shallow copy,一个新的对象，基本数据会拷贝一份新的，但是如果有引用类型，还是原来的引用对象
     LinkedList<E> clone = superClone();
 
     // Put clone into "virgin" state
@@ -1132,10 +1135,9 @@ public class LinkedList<E>
    * @throws NullPointerException if the specified array is null
    */
   @SuppressWarnings("unchecked")
-  public <T> T[] toArray(T[] a) {
+  public <T> T[] toArray(T[] a) {//返回指定类型的数组
     if (a.length < size) {
-      a = (T[]) java.lang.reflect.Array.newInstance(
-          a.getClass().getComponentType(), size);
+      a = (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size);
     }
     int i = 0;
     Object[] result = a;

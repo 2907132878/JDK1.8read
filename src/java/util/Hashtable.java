@@ -128,8 +128,8 @@ import java.util.function.BiFunction;
  * @since JDK1.0
  */
 public class Hashtable<K, V>
-    extends Dictionary<K, V>
-    implements Map<K, V>, Cloneable, java.io.Serializable {
+        extends Dictionary<K, V>
+        implements Map<K, V>, Cloneable, java.io.Serializable {
 
   /**
    * The hash table data.

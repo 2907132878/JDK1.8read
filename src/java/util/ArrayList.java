@@ -113,15 +113,16 @@ import java.util.function.UnaryOperator;
 public class ArrayList<E> extends AbstractList<E>
     implements List<E>, RandomAccess, Cloneable, java.io.Serializable {
 
+  //版本号
   private static final long serialVersionUID = 8683452581122892189L;
 
   /**
-   * Default initial capacity.
+   * Default initial capacity.初始容量
    */
   private static final int DEFAULT_CAPACITY = 10;
 
   /**
-   * Shared empty array instance used for empty instances.
+   * Shared empty array instance used for empty instances.空对象数组
    */
   private static final Object[] EMPTY_ELEMENTDATA = {};
 
@@ -138,17 +139,17 @@ public class ArrayList<E> extends AbstractList<E>
    * empty ArrayList with elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA
    * will be expanded to DEFAULT_CAPACITY when the first element is added.
    */
-  transient Object[] elementData; // non-private to simplify nested class access
+  transient Object[] elementData; // non-private to simplify nested class access 元素数组
 
   /**
    * The size of the ArrayList (the number of elements it contains).
    *
    * @serial
    */
-  private int size;
+  private int size;//实际元素大小
 
   /**
-   * Constructs an empty list with the specified initial capacity.
+   * Constructs an empty list with the specified（明确） initial capacity.初始化一个有初始长度的list
    *
    * @param initialCapacity the initial capacity of the list
    * @throws IllegalArgumentException if the specified initial capacity is negative
@@ -198,12 +199,10 @@ public class ArrayList<E> extends AbstractList<E>
    * list's current size.  An application can use this operation to minimize
    * the storage of an <tt>ArrayList</tt> instance.
    */
-  public void trimToSize() {
+  public void trimToSize() {//elementData数组的长度大于list的实际长度size，把这个ArrayList缩小为实际的长度
     modCount++;
     if (size < elementData.length) {
-      elementData = (size == 0)
-          ? EMPTY_ELEMENTDATA
-          : Arrays.copyOf(elementData, size);
+      elementData = (size == 0) ? EMPTY_ELEMENTDATA : Arrays.copyOf(elementData, size);//Arrays.copyOf(original,newLength)
     }
   }
 
@@ -212,7 +211,7 @@ public class ArrayList<E> extends AbstractList<E>
    * necessary, to ensure that it can hold at least the number of elements
    * specified by the minimum capacity argument.
    *
-   * @param minCapacity the desired minimum capacity
+   * @param minCapacity the desired（期望的） minimum capacity
    */
   public void ensureCapacity(int minCapacity) {
     int minExpand = (elementData != DEFAULTCAPACITY_EMPTY_ELEMENTDATA)
@@ -245,7 +244,7 @@ public class ArrayList<E> extends AbstractList<E>
   }
 
   /**
-   * The maximum size of array to allocate.
+   * The maximum size of array to allocate（分配）.
    * Some VMs reserve some header words in an array.
    * Attempts to allocate larger arrays may result in
    * OutOfMemoryError: Requested array size exceeds VM limit
@@ -261,11 +260,11 @@ public class ArrayList<E> extends AbstractList<E>
   private void grow(int minCapacity) {
     // overflow-conscious code
     int oldCapacity = elementData.length;
-    int newCapacity = oldCapacity + (oldCapacity >> 1);
-    if (newCapacity - minCapacity < 0) {
+    int newCapacity = oldCapacity + (oldCapacity >> 1); //oldCapacity + (1/2)oldCapacity
+    if (newCapacity - minCapacity < 0) {//增加1/2还不够的话就把需要的值赋给newCapacity
       newCapacity = minCapacity;
     }
-    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+    if (newCapacity - MAX_ARRAY_SIZE > 0) {//如果超过了数组的最大长度
       newCapacity = hugeCapacity(minCapacity);
     }
     // minCapacity is usually close to size, so this is a win:
@@ -504,7 +503,7 @@ public class ArrayList<E> extends AbstractList<E>
 
   /**
    * Removes the element at the specified position in this list.
-   * Shifts any subsequent elements to the left (subtracts one from their
+   * Shifts（转换） any subsequent（后来的） elements to the left (subtracts one from their
    * indices).
    *
    * @param index the index of the element to be removed
@@ -521,7 +520,7 @@ public class ArrayList<E> extends AbstractList<E>
     if (numMoved > 0) {
       /// remove是个耗时的操作
       System.arraycopy(elementData, index + 1, elementData, index,
-          numMoved);
+          numMoved);//把index+1开始的值复制到index开始
     }
     elementData[--size] = null; // clear to let GC do its work
 
@@ -606,7 +605,7 @@ public class ArrayList<E> extends AbstractList<E>
     Object[] a = c.toArray();
     int numNew = a.length;
     ensureCapacityInternal(size + numNew);  // Increments modCount
-    System.arraycopy(a, 0, elementData, size, numNew);
+    System.arraycopy(a, 0, elementData, size, numNew);//把a移动到elementData从size开始
     size += numNew;
     return numNew != 0;
   }
@@ -635,7 +634,7 @@ public class ArrayList<E> extends AbstractList<E>
     int numMoved = size - index;
     if (numMoved > 0) {
       System.arraycopy(elementData, index, elementData, index + numNew,
-          numMoved);
+          numMoved);//index移动到index+numNew
     }
 
     System.arraycopy(a, 0, elementData, index, numNew);
@@ -740,20 +739,18 @@ public class ArrayList<E> extends AbstractList<E>
     boolean modified = false;
     try {
       for (; r < size; r++) {
-        if (c.contains(elementData[r]) == complement) {
+        if (c.contains(elementData[r]) == complement) {//complement为false，为删除集合c，complement为true，为求与c的交集
           elementData[w++] = elementData[r];
         }
       }
     } finally {
       // Preserve behavioral compatibility with AbstractCollection,
       // even if c.contains() throws.
-      if (r != size) {
-        System.arraycopy(elementData, r,
-            elementData, w,
-            size - r);
+      if (r != size) {//contains出现异常的时候，r不等于size,把r开始的值全部移到w开始的
+        System.arraycopy(elementData, r, elementData, w, size - r);
         w += size - r;
       }
-      if (w != size) {
+      if (w != size) {//把之后的清空
         // clear to let GC do its work
         for (int i = w; i < size; i++) {
           elementData[i] = null;
@@ -1054,8 +1051,7 @@ public class ArrayList<E> extends AbstractList<E>
     private final int offset;
     int size;
 
-    SubList(AbstractList<E> parent,
-        int offset, int fromIndex, int toIndex) {
+    SubList(AbstractList<E> parent, int offset, int fromIndex, int toIndex) {
       this.parent = parent;
       this.parentOffset = fromIndex;
       this.offset = offset + fromIndex;

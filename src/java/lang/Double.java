@@ -53,21 +53,21 @@ public final class Double extends Number implements Comparable<Double> {
    * {@code double}. It is equal to the value returned by
    * {@code Double.longBitsToDouble(0x7ff0000000000000L)}.
    */
-  public static final double POSITIVE_INFINITY = 1.0 / 0.0;
+  public static final double POSITIVE_INFINITY = 1.0 / 0.0;//double正无穷大
 
   /**
    * A constant holding the negative infinity of type
    * {@code double}. It is equal to the value returned by
    * {@code Double.longBitsToDouble(0xfff0000000000000L)}.
    */
-  public static final double NEGATIVE_INFINITY = -1.0 / 0.0;
+  public static final double NEGATIVE_INFINITY = -1.0 / 0.0;//double负无穷大
 
   /**
    * A constant holding a Not-a-Number (NaN) value of type
    * {@code double}. It is equivalent to the value returned by
    * {@code Double.longBitsToDouble(0x7ff8000000000000L)}.
    */
-  public static final double NaN = 0.0d / 0.0;
+  public static final double NaN = 0.0d / 0.0;//
 
   /**
    * A constant holding the largest positive finite value of type

@@ -306,7 +306,7 @@ public class HashMap<K, V> extends AbstractMap<K, V>
     }
 
     public final int hashCode() {
-      return Objects.hashCode(key) ^ Objects.hashCode(value);
+      return Objects.hashCode(key) ^ Objects.hashCode(value);//^异或 相同为0，不同为1
     }
 
     public final V setValue(V newValue) {
@@ -400,7 +400,7 @@ public class HashMap<K, V> extends AbstractMap<K, V>
    */
   static final int tableSizeFor(int cap) {
     int n = cap - 1;
-    n |= n >>> 1;
+    n |= n >>> 1;//n = n | n >>> 1
     n |= n >>> 2;
     n |= n >>> 4;
     n |= n >>> 8;
@@ -527,13 +527,12 @@ public class HashMap<K, V> extends AbstractMap<K, V>
     int s = m.size();
     if (s > 0) {
       if (table == null) { // pre-size
-        float ft = ((float) s / loadFactor) + 1.0F;
-        int t = ((ft < (float) MAXIMUM_CAPACITY) ?
-            (int) ft : MAXIMUM_CAPACITY);
+        float ft = ((float) s / loadFactor) + 1.0F;// ft代表 在默认负载因子下，该hashmap的容量
+        int t = ((ft < (float) MAXIMUM_CAPACITY) ? (int) ft : MAXIMUM_CAPACITY);
         if (t > threshold) {
-          threshold = tableSizeFor(t);
+          threshold = tableSizeFor(t);//重新设置临界值
         }
-      } else if (s > threshold) {
+      } else if (s > threshold) {//m的实际大小大于临界值，扩容
         resize();
       }
       for (Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
@@ -597,9 +596,8 @@ public class HashMap<K, V> extends AbstractMap<K, V>
     int n;
     K k;
     /// 注意直接通过(n - 1) & hash算出下标
-    if ((tab = table) != null && (n = tab.length) > 0 &&
-        (first = tab[(n - 1) & hash]) != null) {
-      if (first.hash == hash && // always check first node
+    if ((tab = table) != null && (n = tab.length) > 0 && (first = tab[(n - 1) & hash]) != null) {
+      if (first.hash == hash && // always check first node，第一个相等则返回第一个
           ((k = first.key) == key || (key != null && key.equals(k)))) {
         return first;
       }
@@ -609,8 +607,7 @@ public class HashMap<K, V> extends AbstractMap<K, V>
           return ((TreeNode<K, V>) first).getTreeNode(hash, key);
         }
         do {
-          if (e.hash == hash &&
-              ((k = e.key) == key || (key != null && key.equals(k)))) {
+          if (e.hash == hash && ((k = e.key) == key || (key != null && key.equals(k)))) {
             return e;
           }
         } while ((e = e.next) != null);
@@ -663,14 +660,13 @@ public class HashMap<K, V> extends AbstractMap<K, V>
     if ((tab = table) == null || (n = tab.length) == 0) {
       n = (tab = resize()).length;
     }
-    if ((p = tab[i = (n - 1) & hash]) == null) {
+    if ((p = tab[i = (n - 1) & hash]) == null) {//当前位置为空
       tab[i] = newNode(hash, key, value, null);
-    } else {
+    } else {//位置节点不为空
       Node<K, V> e;
       K k;
-      if (p.hash == hash &&
-          ((k = p.key) == key || (key != null && key.equals(k)))) {
-        e = p;
+      if (p.hash == hash && ((k = p.key) == key || (key != null && key.equals(k)))) {
+        e = p;//key相同
       } else if (p instanceof TreeNode) {
         e = ((TreeNode<K, V>) p).putTreeVal(this, tab, hash, key, value);
       } else {
@@ -684,8 +680,7 @@ public class HashMap<K, V> extends AbstractMap<K, V>
             }
             break;
           }
-          if (e.hash == hash &&
-              ((k = e.key) == key || (key != null && key.equals(k)))) {
+          if (e.hash == hash && ((k = e.key) == key || (key != null && key.equals(k)))) {
             break;
           }
           p = e;
@@ -721,58 +716,62 @@ public class HashMap<K, V> extends AbstractMap<K, V>
   final Node<K, V>[] resize() {
     Node<K, V>[] oldTab = table;
     int oldCap = (oldTab == null) ? 0 : oldTab.length;
-    int oldThr = threshold;
+    int oldThr = threshold;//hashMap的阈值，用于判断是否需要调整HashMap的容量
     int newCap, newThr = 0;
-    if (oldCap > 0) {
+    if (oldCap > 0) {//如果旧值大于0
       ///已经最大了，则不再扩张, 所以此时loadfactor很大，冲突量比较大，查询不再是O(1)
       if (oldCap >= MAXIMUM_CAPACITY) {
         threshold = Integer.MAX_VALUE;
         return oldTab;
-      } else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY &&
-          oldCap >= DEFAULT_INITIAL_CAPACITY) {
+      } else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY && oldCap >= DEFAULT_INITIAL_CAPACITY) {
         newThr = oldThr << 1; // double threshold
       }
-    } else if (oldThr > 0) // initial capacity was placed in threshold
-    {
-      newCap = oldThr;
+    } else if (oldThr > 0){// initial capacity was placed in threshold
+      newCap = oldThr;//oldCap的length<=0,相当于初始化一个threshold大小的初始值
     } else {               // zero initial threshold signifies using defaults
-      newCap = DEFAULT_INITIAL_CAPACITY;
-      newThr = (int) (DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
+      newCap = DEFAULT_INITIAL_CAPACITY;//否则就是默认大小 16
+      newThr = (int) (DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);//初始化阈值
     }
-    if (newThr == 0) {
-      float ft = (float) newCap * loadFactor;
-      newThr = (newCap < MAXIMUM_CAPACITY && ft < (float) MAXIMUM_CAPACITY ?
-          (int) ft : Integer.MAX_VALUE);
+    if (newThr == 0) {//如果新的阈值为0
+      float ft = (float) newCap * loadFactor;//赋新值
+      newThr = (newCap < MAXIMUM_CAPACITY && ft < (float) MAXIMUM_CAPACITY ? (int) ft : Integer.MAX_VALUE);
     }
     threshold = newThr;
     @SuppressWarnings({"rawtypes", "unchecked"})
     /// 按newCap创建新的数组
     Node<K, V>[] newTab = (Node<K, V>[]) new Node[newCap];
     table = newTab;
-    if (oldTab != null) {
-      for (int j = 0; j < oldCap; ++j) {
+    if (oldTab != null) {//旧的数组不为空
+      for (int j = 0; j < oldCap; ++j) {//循环
         Node<K, V> e;
         if ((e = oldTab[j]) != null) {
           oldTab[j] = null;
           ///普通节点, 位置是hash求余
-          if (e.next == null) {
-            newTab[e.hash & (newCap - 1)] = e;
-          } else if (e instanceof TreeNode) {
+          if (e.next == null) {//
+            newTab[e.hash & (newCap - 1)] = e;//节点处只有一个元素，直接旧节点移到新节点
+          } else if (e instanceof TreeNode) {//如果是树节点
             ((TreeNode<K, V>) e).split(this, newTab, j, oldCap);
-          } else { // preserve order
+          } else { // preserve order 链表处，把原来的一个链表分为两个链表
             Node<K, V> loHead = null, loTail = null;
             Node<K, V> hiHead = null, hiTail = null;
             Node<K, V> next;
             do {
               next = e.next;
-              if ((e.hash & oldCap) == 0) {
+              if ((e.hash & oldCap) == 0) {//原位置
+                // 这里的操作就是 (e.hash & oldCap) == 0 这一句，
+//                这一句如果是true，表明(e.hash & (newCap - 1))还会和
+//                e.hash & (oldCap - 1)一样。因为oldCap和newCap是2的次幂，
+//                并且newCap是oldCap的两倍，就相当于oldCap的唯一
+//                        一个二进制的1向高位移动了一位
+//                (e.hash & oldCap) == 0就代表了(e.hash & (newCap - 1))还会和
+//                e.hash & (oldCap - 1)一样。
                 if (loTail == null) {
                   loHead = e;
                 } else {
                   loTail.next = e;
                 }
                 loTail = e;
-              } else {
+              } else {//不是在原位置，放到另一个新链表中
                 if (hiTail == null) {
                   hiHead = e;
                 } else {
@@ -2034,9 +2033,7 @@ public class HashMap<K, V> extends AbstractMap<K, V>
           p = pr;
         } else if (pr == null) {
           p = pl;
-        } else if ((kc != null ||
-            (kc = comparableClassFor(k)) != null) &&
-            (dir = compareComparables(kc, k, pk)) != 0) {
+        } else if ((kc != null || (kc = comparableClassFor(k)) != null) && (dir = compareComparables(kc, k, pk)) != 0) {
           p = (dir < 0) ? pl : pr;
         } else if ((q = pr.find(h, k, kc)) != null) {
           return q;
@@ -2155,16 +2152,11 @@ public class HashMap<K, V> extends AbstractMap<K, V>
           dir = 1;
         } else if ((pk = p.key) == k || (k != null && k.equals(pk))) {
           return p;
-        } else if ((kc == null &&
-            (kc = comparableClassFor(k)) == null) ||
-            (dir = compareComparables(kc, k, pk)) == 0) {
+        } else if ((kc == null && (kc = comparableClassFor(k)) == null) || (dir = compareComparables(kc, k, pk)) == 0) {
           if (!searched) {
             TreeNode<K, V> q, ch;
             searched = true;
-            if (((ch = p.left) != null &&
-                (q = ch.find(h, k, kc)) != null) ||
-                ((ch = p.right) != null &&
-                    (q = ch.find(h, k, kc)) != null)) {
+            if (((ch = p.left) != null && (q = ch.find(h, k, kc)) != null) || ((ch = p.right) != null && (q = ch.find(h, k, kc)) != null)) {
               return q;
             }
           }
@@ -2593,5 +2585,6 @@ public class HashMap<K, V> extends AbstractMap<K, V>
       return true;
     }
   }
+
 
 }

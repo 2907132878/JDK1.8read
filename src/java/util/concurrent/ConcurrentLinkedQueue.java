@@ -334,7 +334,7 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E>
       Node<E> q = p.next;
       if (q == null) {
         // p is last node
-        if (p.casNext(null, newNode)) {
+        if (p.casNext(null, newNode)) {//使用casNext将插入的Node设置成当前队列尾节点p的next节点
           // Successful CAS is the linearization point
           // for e to become an element of this queue,
           // and for newNode to become "live".
@@ -345,17 +345,25 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E>
           return true;
         }
         // Lost CAS race to another thread; re-read next
-      } else if (p == q)
+      } else if (p == q)//哨兵节点，说明该节点已经被删除，链表以为空，从头开始插入
       // We have fallen off list.  If tail is unchanged, it
       // will also be off-list, in which case we need to
       // jump to head, from which all live nodes are always
       // reachable.  Else the new tail is a better bet.
       {
-        p = (t != (t = tail)) ? t : head;
+        p = (t != (t = tail)) ? t : head;//head
       } else
       // Check for tail updates after two hops.
       {
         p = (p != t && t != (t = tail)) ? t : q;
+        //在单线程中,这段代码永远不会将p赋值为t,那么这么写就不会有任何作用
+        //假设线程A此时读取了变量t，
+        // 线程B刚好在这个时候offer一个Node后，此时会修改tail指针,
+        // 那么这个时候线程A再次执行t=tail时t会指向另外一个节点，
+        // 很显然线程A前后两次读取的变量t指向的节点不相同，
+        // 即t != (t = tail)为true,并且由于t指向节点的变化p != t也为true，
+        // 此时该行代码的执行结果为p和t最新的t指针指向了同一个节点，并且此时t也是队列真正的对尾节点。
+        // 那么，现在已经定位到队列真正的队尾节点，就可以执行offer操作了。
       }
     }
   }
@@ -378,6 +386,11 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E>
           updateHead(h, p);
           return null;
         } else if (p == q) {
+          //当线程A在判断p==q时，
+          // 线程B已经将执行完poll方法将
+          // p指向的节点转换为哨兵节点并且head指向的节点已经发生了改变，
+          // 所以就需要从restartFromHead处执行，
+          // 保证用到的是最新的head。
           continue restartFromHead;
         } else {
           p = q;

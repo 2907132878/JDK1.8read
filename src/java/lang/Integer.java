@@ -56,14 +56,14 @@ public final class Integer extends Number implements Comparable<Integer> {
    * have, -2<sup>31</sup>.
    */
   @Native
-  public static final int MIN_VALUE = 0x80000000;
+  public static final int MIN_VALUE = 0x80000000;//-2^31
 
   /**
    * A constant holding the maximum value an {@code int} can
    * have, 2<sup>31</sup>-1.
    */
   @Native
-  public static final int MAX_VALUE = 0x7fffffff;
+  public static final int MAX_VALUE = 0x7fffffff;//2^31-1
 
   /**
    * The {@code Class} instance representing the primitive type
@@ -606,7 +606,7 @@ public final class Integer extends Number implements Comparable<Integer> {
   /**
    * Parses the string argument as a signed decimal integer. The
    * characters in the string must all be decimal digits, except
-   * that the first character may be an ASCII minus sign {@code '-'}
+   * that the first character may be an ASCII minus sign {@code '-'}、
    * ({@code '\u005Cu002D'}) to indicate a negative value or an
    * ASCII plus sign {@code '+'} ({@code '\u005Cu002B'}) to
    * indicate a positive value. The resulting integer value is
@@ -1052,7 +1052,7 @@ public final class Integer extends Number implements Comparable<Integer> {
    * @see java.lang.System#getProperty(java.lang.String)
    * @see java.lang.System#getProperty(java.lang.String, java.lang.String)
    */
-  public static Integer getInteger(String nm, int val) {
+  public static Integer  getInteger(String nm, int val) {
     Integer result = getInteger(nm, null);
     return (result == null) ? Integer.valueOf(val) : result;
   }
@@ -1149,7 +1149,7 @@ public final class Integer extends Number implements Comparable<Integer> {
    * @throws NumberFormatException if the {@code String} does not contain a parsable integer.
    * @see java.lang.Integer#parseInt(java.lang.String, int)
    */
-  public static Integer decode(String nm) throws NumberFormatException {
+  public static Integer decode(String nm) throws NumberFormatException {//把十进制，十六进制和八进制数的字符串转化为Integer
     int radix = 10;
     int index = 0;
     boolean negative = false;

@@ -2719,9 +2719,7 @@ public class Collections {
    * @return a synchronized view of the specified list.
    */
   public static <T> List<T> synchronizedList(List<T> list) {
-    return (list instanceof RandomAccess ?
-        new SynchronizedRandomAccessList<>(list) :
-        new SynchronizedList<>(list));
+    return (list instanceof RandomAccess ? new SynchronizedRandomAccessList<>(list) : new SynchronizedList<>(list));
   }
 
   static <T> List<T> synchronizedList(List<T> list, Object mutex) {

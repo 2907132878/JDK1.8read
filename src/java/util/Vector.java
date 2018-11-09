@@ -261,8 +261,7 @@ public class Vector<E>
   private void grow(int minCapacity) {
     // overflow-conscious code
     int oldCapacity = elementData.length;
-    int newCapacity = oldCapacity + ((capacityIncrement > 0) ?
-        capacityIncrement : oldCapacity);
+    int newCapacity = oldCapacity + ((capacityIncrement > 0) ? capacityIncrement : oldCapacity);//capacityIncrement不为0，增加capacityIncrement，否则默认增加一倍
     if (newCapacity - minCapacity < 0) {
       newCapacity = minCapacity;
     }

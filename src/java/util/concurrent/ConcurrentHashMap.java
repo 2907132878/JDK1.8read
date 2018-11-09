@@ -509,19 +509,19 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
    * because the top two bits of 32bit hash fields are used for
    * control purposes.
    */
-  private static final int MAXIMUM_CAPACITY = 1 << 30;
+  private static final int MAXIMUM_CAPACITY = 1 << 30; //2^30
 
   /**
    * The default initial table capacity.  Must be a power of 2
    * (i.e., at least 1) and at most MAXIMUM_CAPACITY.
    */
-  private static final int DEFAULT_CAPACITY = 16;
+  private static final int DEFAULT_CAPACITY = 16;//默认初始值
 
   /**
    * The largest possible (non-power of two) array size.
    * Needed by toArray and related methods.
    */
-  static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+  static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;//
 
   /**
    * The default concurrency level for this table. Unused but
@@ -919,8 +919,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
       initialCapacity = concurrencyLevel;   // as estimated threads
     }
     long size = (long) (1.0 + (long) initialCapacity / loadFactor);
-    int cap = (size >= (long) MAXIMUM_CAPACITY) ?
-        MAXIMUM_CAPACITY : tableSizeFor((int) size);
+    int cap = (size >= (long) MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : tableSizeFor((int) size);
     this.sizeCtl = cap;
   }
 
@@ -960,8 +959,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
     int n, eh;
     K ek;
     int h = spread(key.hashCode());
-    if ((tab = table) != null && (n = tab.length) > 0 &&
-        (e = tabAt(tab, (n - 1) & h)) != null) {
+    if ((tab = table) != null && (n = tab.length) > 0 && (e = tabAt(tab, (n - 1) & h)) != null) {
       if ((eh = e.hash) == h) {
         if ((ek = e.key) == key || (ek != null && key.equals(ek))) {
           return e.val;
@@ -1038,7 +1036,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
    * Implementation for put and putIfAbsent
    */
   final V putVal(K key, V value, boolean onlyIfAbsent) {
-    if (key == null || value == null) {
+    if (key == null || value == null) {//不允许有空值
       throw new NullPointerException();
     }
     int hash = spread(key.hashCode());
@@ -1046,40 +1044,37 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
     for (Node<K, V>[] tab = table; ; ) {
       Node<K, V> f;
       int n, i, fh;
-      if (tab == null || (n = tab.length) == 0) {
+      if (tab == null || (n = tab.length) == 0) {//如果table为空，则初始化table
         tab = initTable();
-      } else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
-        if (casTabAt(tab, i, null,
-            new Node<K, V>(hash, key, value, null))) {
+      } else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {//如果当前位置没有值，通过CAS直接插入
+        if (casTabAt(tab, i, null, new Node<K, V>(hash, key, value, null))) {
           break;                   // no lock when adding to empty bin
         }
-      } else if ((fh = f.hash) == MOVED) {
-        tab = helpTransfer(tab, f);
-      } else {
+      } else if ((fh = f.hash) == MOVED) {//如果正在扩容
+        tab = helpTransfer(tab, f);//帮助别的线程扩容
+      } else {//正常插入链表或者红黑树
         V oldVal = null;
-        synchronized (f) {
+        synchronized (f) {//插入的时候加锁
           if (tabAt(tab, i) == f) {
-            if (fh >= 0) {
+            if (fh >= 0) {//链表
               binCount = 1;
               for (Node<K, V> e = f; ; ++binCount) {
                 K ek;
-                if (e.hash == hash &&
-                    ((ek = e.key) == key ||
-                        (ek != null && key.equals(ek)))) {
+                if (e.hash == hash && ((ek = e.key) == key || (ek != null && key.equals(ek)))) {//节点与插入的相同
                   oldVal = e.val;
-                  if (!onlyIfAbsent) {
-                    e.val = value;
+                  if (!onlyIfAbsent) {//如果可以更新值
+                    e.val = value;//节点赋新值
                   }
                   break;
                 }
                 Node<K, V> pred = e;
-                if ((e = e.next) == null) {
+                if ((e = e.next) == null) {//插入到末尾
                   pred.next = new Node<K, V>(hash, key,
                       value, null);
                   break;
                 }
               }
-            } else if (f instanceof TreeBin) {
+            } else if (f instanceof TreeBin) {//如果是红黑树
               Node<K, V> p;
               binCount = 2;
               if ((p = ((TreeBin<K, V>) f).putTreeVal(hash, key,
@@ -1093,17 +1088,17 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
           }
         }
         if (binCount != 0) {
-          if (binCount >= TREEIFY_THRESHOLD) {
+          if (binCount >= TREEIFY_THRESHOLD) {//链表大于等于8，转为红黑树
             treeifyBin(tab, i);
           }
-          if (oldVal != null) {
+          if (oldVal != null) {//如果是替换值，返回旧值
             return oldVal;
           }
           break;
         }
       }
     }
-    addCount(1L, binCount);
+    addCount(1L, binCount);//检查是否需要扩容
     return null;
   }
 
@@ -2305,16 +2300,18 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
     Node<K, V>[] tab;
     int sc;
     while ((tab = table) == null || tab.length == 0) {
-      if ((sc = sizeCtl) < 0) {
+      if ((sc = sizeCtl) < 0) {//sizeCtl为-1，表示正在初始化，-N,N-1个线程正在扩容
         Thread.yield(); // lost initialization race; just spin
-      } else if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {
+      } else if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {//四个参数，其中第一个参数为需要改变的对象，
+                                                                     // 第二个为偏移量(即之前求出来的valueOffset的值)，
+                                                                     // 第三个参数为期待的值，第四个为更新后的值
         try {
           if ((tab = table) == null || tab.length == 0) {
             int n = (sc > 0) ? sc : DEFAULT_CAPACITY;
             @SuppressWarnings("unchecked")
             Node<K, V>[] nt = (Node<K, V>[]) new Node<?, ?>[n];
             table = tab = nt;
-            sc = n - (n >>> 2);
+            sc = n - (n >>> 2);//数组可用大小 0.75n
           }
         } finally {
           sizeCtl = sc;
@@ -2465,7 +2462,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
     if (nextTab == null) {            // initiating
       try {
         @SuppressWarnings("unchecked")
-        Node<K, V>[] nt = (Node<K, V>[]) new Node<?, ?>[n << 1];
+        Node<K, V>[] nt = (Node<K, V>[]) new Node<?, ?>[n << 1];//新建数组，容量为原来的两倍
         nextTab = nt;
       } catch (Throwable ex) {      // try to cope with OOME
         sizeCtl = Integer.MAX_VALUE;
@@ -2475,7 +2472,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
       transferIndex = n;
     }
     int nextn = nextTab.length;
-    ForwardingNode<K, V> fwd = new ForwardingNode<K, V>(nextTab);
+    ForwardingNode<K, V> fwd = new ForwardingNode<K, V>(nextTab);//新建ForwardingNode引用
     boolean advance = true;
     boolean finishing = false; // to ensure sweep before committing nextTab
     for (int i = 0, bound = 0; ; ) {
@@ -2514,7 +2511,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
         }
       } else if ((f = tabAt(tab, i)) == null) {
         advance = casTabAt(tab, i, null, fwd);
-      } else if ((fh = f.hash) == MOVED) {
+      } else if ((fh = f.hash) == MOVED) { //如果遍历到ForwardingNode节点  说明这个点已经被处理过了 直接跳过  这里是控制并发扩容的核心
         advance = true; // already processed
       } else {
         synchronized (f) {
@@ -2548,7 +2545,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                 }
               }
               setTabAt(nextTab, i, ln);
-              setTabAt(nextTab, i + n, hn);
+              setTabAt(nextTab, i + n, hn);  //在table的i位置上插入forwardNode节点  表示已经处理过该节点
               setTabAt(tab, i, fwd);
               advance = true;
             } else if (f instanceof TreeBin) {
@@ -2584,7 +2581,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                   (lc != 0) ? new TreeBin<K, V>(hi) : t;
               setTabAt(nextTab, i, ln);
               setTabAt(nextTab, i + n, hn);
-              setTabAt(tab, i, fwd);
+              setTabAt(tab, i, fwd);  //在table的i位置上插入forwardNode节点  表示已经处理过该节点
               advance = true;
             }
           }
