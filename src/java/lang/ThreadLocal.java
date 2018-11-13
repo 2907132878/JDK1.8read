@@ -425,6 +425,9 @@ public class ThreadLocal<T> {
       if (e != null && e.get() == key) {
         return e;
       } else {
+        //若能当前定位的entry的key和查找的key相同的话就直接返回这个entry，
+        // 否则的话就是在set的时候存在hash冲突的情况，
+        // 需要通过getEntryAfterMiss做进一步处理
         return getEntryAfterMiss(key, i, e);
       }
     }
@@ -474,16 +477,16 @@ public class ThreadLocal<T> {
       int len = tab.length;
       int i = key.threadLocalHashCode & (len - 1);
 
-      for (Entry e = tab[i];
-          e != null;
-          e = tab[i = nextIndex(i, len)]) {
+      //采用开放地址法，hash冲突的时候使用线性探测
+      for (Entry e = tab[i]; e != null; e = tab[i = nextIndex(i, len)]) {
         ThreadLocal<?> k = e.get();
 
         if (k == key) {
           e.value = value;
           return;
         }
-
+        //当key为null时，说明threadLocal强引用已经被释放掉，那么就无法
+        //再通过这个key获取threadLocalMap中对应的entry，这里就存在内存泄漏的可能性
         if (k == null) {
           replaceStaleEntry(key, value, i);
           return;
